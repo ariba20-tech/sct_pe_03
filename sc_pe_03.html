@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Automation Prompting System</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+        }
+        
+        textarea, input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: border 0.3s;
+        }
+        
+        textarea:focus, input:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-secondary {
+            background-color: var(--accent);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a08a1;
+        }
+        
+        .output-container {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            min-height: 200px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .example {
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: rgba(76, 201, 240, 0.1);
+        }
+        
+        .example-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+        
+        .example-input, .example-output {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .reflection {
+            background-color: rgba(247, 37, 133, 0.05);
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .reflection-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--warning);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Task Automation Prompting System</h1>
+            <p class="subtitle">Transform unstructured text into structured data with AI-powered prompts</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="left-column">
+                <div class="card">
+                    <h2 class="card-title">System Prompt</h2>
+                    <div class="input-group">
+                        <label class="input-label" for="task-type">Task Type</label>
+                        <select id="task-type">
+                            <option value="extraction">Data Extraction</option>
+                            <option value="summarization">Text Summarization</option>
+                            <option value="transformation">Format Transformation</option>
+                            <option value="custom">Custom Task</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label" for="system-prompt">System Prompt</label>
+                        <textarea id="system-prompt">You are a helpful assistant that extracts structured data from unstructured text. Extract the following information from the provided text and format it as a JSON object with the specified keys. If any information is missing, use null.
+
+Required fields:
+- name
+- email
+- phone
+- company
+- position</textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label" for="user-input">Input Text</label>
+                        <textarea id="user-input" placeholder="Enter your text here...">Hi, my name is John Smith. I work as a Senior Developer at TechCorp. You can reach me at john.smith@techcorp.com or call me at (555) 123-4567.</textarea>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="process-btn" class="btn">Process Input</button>
+                        <button id="clear-btn" class="btn btn-secondary">Clear</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="card-title">Output</h2>
+                    <div class="output-container" id="output">
+                        Your processed output will appear here...
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="card">
+                    <h2 class="card-title">Examples</h2>
+                    <div class="tabs">
+                        <div class="tab active" data-tab="example1">Example 1</div>
+                        <div class="tab" data-tab="example2">Example 2</div>
+                        <div class="tab" data-tab="example3">Example 3</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="example1">
+                        <div class="example">
+                            <div class="example-title">Input:</div>
+                            <div class="example-input">Hello, I'm Sarah Johnson, Marketing Director at InnovateCo. Contact me at sarah.j@innovateco.com or 555-987-6543.</div>
+                            
+                            <div class="example-title">Output:</div>
+                            <div class="example-output">{
+  "name": "Sarah Johnson",
+  "email": "sarah.j@innovateco.com",
+  "phone": "555-987-6543",
+  "company": "InnovateCo",
+  "position": "Marketing Director"
+}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="example2">
+                        <div class="example">
+                            <div class="example-title">Input:</div>
+                            <div class="example-input">Dr. Michael Chen, Professor at University of Tech. Email: mchen@unitech.edu. Research focus: AI and Machine Learning.</div>
+                            
+                            <div class="example-title">Output:</div>
+                            <div class="example-output">{
+  "name": "Dr. Michael Chen",
+  "email": "mchen@unitech.edu",
+  "phone": null,
+  "company": "University of Tech",
+  "position": "Professor"
+}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="example3">
+                        <div class="example">
+                            <div class="example-title">Input:</div>
+                            <div class="example-input">Alex Taylor - Software Engineer - Google - alex.taylor@google.com - 415-555-7890</div>
+                            
+                            <div class="example-title">Output:</div>
+                            <div class="example-output">{
+  "name": "Alex Taylor",
+  "email": "alex.taylor@google.com",
+  "phone": "415-555-7890",
+  "company": "Google",
+  "position": "Software Engineer"
+}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="card-title">Prompt Iteration & Debugging</h2>
+                    <div class="reflection">
+                        <div class="reflection-title">Reflection on Prompt Development:</div>
+                        <p>Creating effective prompts requires iteration and testing. Here are key insights from developing this system:</p>
+                        <ul>
+                            <li><strong>Specificity is crucial</strong> - Vague prompts lead to inconsistent outputs</li>
+                            <li><strong>Examples improve reliability</strong> - Providing clear input-output pairs helps the model understand the task</li>
+                            <li><strong>Handle edge cases explicitly</strong> - Specify how to handle missing information (e.g., use null)</li>
+                            <li><strong>Format constraints matter</strong> - Requesting specific formats (JSON) ensures consistent, machine-readable output</li>
+                            <li><strong>Test with diverse inputs</strong> - Validate the prompt with various text structures and content</li>
+                        </ul>
+                        <p>Through multiple iterations, I refined the prompt to handle different text formats while maintaining consistent output structure.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Task Automation Prompting System &copy; 2025 | Designed for TASK 03: Prompting for Task Automation</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and content
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Process button functionality
+            document.getElementById('process-btn').addEventListener('click', function() {
+                const userInput = document.getElementById('user-input').value;
+                const outputElement = document.getElementById('output');
+                
+                if (!userInput.trim()) {
+                    outputElement.textContent = "Please enter some text to process.";
+                    return;
+                }
+                
+                // Show loading state
+                outputElement.textContent = "Processing...";
+                
+                // Simulate processing with a timeout (in a real app, this would call an API)
+                setTimeout(() => {
+                    // Simple processing logic for demonstration
+                    let result = {};
+                    
+                    // Extract name (simple pattern matching for demo)
+                    const nameMatch = userInput.match(/(?:name is|I'm|I am|called)\s+([A-Za-z\s]+?)(?=\.|,|$)/i);
+                    if (nameMatch) {
+                        result.name = nameMatch[1].trim();
+                    } else {
+                        // Try to find name at the beginning
+                        const startNameMatch = userInput.match(/^([A-Za-z\s]+?)(?=\s+-|\s+at|\s+works|$)/);
+                        if (startNameMatch) {
+                            result.name = startNameMatch[1].trim();
+                        } else {
+                            result.name = null;
+                        }
+                    }
+                    
+                    // Extract email
+                    const emailMatch = userInput.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
+                    result.email = emailMatch ? emailMatch[0] : null;
+                    
+                    // Extract phone
+                    const phoneMatch = userInput.match(/(\(\d{3}\)\s?\d{3}-\d{4}|\d{3}-\d{3}-\d{4}|\d{3}\.\d{3}\.\d{4})/);
+                    result.phone = phoneMatch ? phoneMatch[0] : null;
+                    
+                    // Extract company
+                    const companyMatch = userInput.match(/(?:at|works? at|company:?)\s+([A-Za-z0-9\s]+?)(?=\.|,|$)/i);
+                    if (companyMatch) {
+                        result.company = companyMatch[1].trim();
+                    } else {
+                        // Try to find company after dashes
+                        const dashCompanyMatch = userInput.match(/- ([A-Za-z0-9\s]+?) -/);
+                        if (dashCompanyMatch) {
+                            result.company = dashCompanyMatch[1].trim();
+                        } else {
+                            result.company = null;
+                        }
+                    }
+                    
+                    // Extract position
+                    const positionMatch = userInput.match(/(?:as a|position:?|role:?)\s+([A-Za-z\s]+?)(?=\.|,|at|$)/i);
+                    if (positionMatch) {
+                        result.position = positionMatch[1].trim();
+                    } else {
+                        // Try to find position after name
+                        const dashPositionMatch = userInput.match(/- ([A-Za-z\s]+?) -/);
+                        if (dashPositionMatch && !result.company) {
+                            result.position = dashPositionMatch[1].trim();
+                        } else {
+                            result.position = null;
+                        }
+                    }
+                    
+                    // Format as JSON
+                    outputElement.textContent = JSON.stringify(result, null, 2);
+                }, 1000);
+            });
+            
+            // Clear button functionality
+            document.getElementById('clear-btn').addEventListener('click', function() {
+                document.getElementById('user-input').value = '';
+                document.getElementById('output').textContent = 'Your processed output will appear here...';
+            });
+            
+            // Task type selector functionality
+            document.getElementById('task-type').addEventListener('change', function() {
+                const taskType = this.value;
+                const promptTextarea = document.getElementById('system-prompt');
+                
+                switch(taskType) {
+                    case 'extraction':
+                        promptTextarea.value = `You are a helpful assistant that extracts structured data from unstructured text. Extract the following information from the provided text and format it as a JSON object with the specified keys. If any information is missing, use null.
+
+Required fields:
+- name
+- email
+- phone
+- company
+- position`;
+                        break;
+                    case 'summarization':
+                        promptTextarea.value = `You are a helpful assistant that summarizes text. Create a concise summary of the provided text, capturing the main points and key information. Format your response as a paragraph with no more than 3 sentences.`;
+                        break;
+                    case 'transformation':
+                        promptTextarea.value = `You are a helpful assistant that transforms text formats. Convert the provided bullet points or unstructured text into a structured JSON format. Ensure the output is valid JSON.`;
+                        break;
+                    case 'custom':
+                        promptTextarea.value = `You are a helpful assistant. Follow the instructions provided in the user input carefully and produce the requested output format.`;
+                        break;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
